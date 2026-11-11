@@ -10,7 +10,24 @@ An **unofficial** [XanMod](https://gitlab.com/xanmod/linux) kernel port for **Wi
 - **Microsoft's dxgkrnl** patches for GPU support
 - **Compiled with Clang + ThinLTO** for additional optimizations
 - **Automated builds** via GitHub Actions (always up-to-date)
-- **Multiple CPU-optimized variants** (x64v2, x64v3, Skylake, Zen3)
+- **Multiple CPU-optimized variants** (x64v2, x64v3, Skylake, Zen3, Zen5)
+- **Extreme Performance Edition**: Zero-mitigations (`mitigations=off`) and THP always for local dev workloads
+
+## Benchmark (AMD Ryzen 7 9700X Zen 5)
+
+实测数据对比（微软官方原版 vs XanMod 7.2 vs **Zen 5 满血定制版**）：
+
+![WSL2 Zen5 Benchmark](assets/benchmark_comparison.png)
+
+| 评测项 (Benchmark) | 微软原版 (`ms`) | 7.2 调优前 (`xanmod`) | 7.2 调优最高 (`tuned`) | **Zen 5 满血版 (当前)** | **较 7.2 历史最高提升** |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **系统调用吞吐 (`syscall_rate`)** | 645 万/s | 634 万/s | 674 万/s | **1,866 万/s** | **+176.9%（近 2.8 倍！）** |
+| **上下文切换 (`ctx_switch`)** | 136 万/s | 136 万/s | 141 万/s | **447 万/s** | **+215.5%（超 3.1 倍！）** |
+| **磁盘 4K IOPS (`disk_iops`)** | 55.9 万 | 31.7 万 | 122.4 万 | **212.9 万** | **+73.9%（突破 212 万）** |
+| **进程创建速率 (`fork_rate`)** | 1,691 次/s | 2,030 次/s | 2,092 次/s | **2,886 次/s** | **+38.0% 提升** |
+| **内存读写带宽 (`mem_bw`)** | 2,469 MB/s | 8,536 MB/s | 9,167 MB/s | **8,760 MB/s** | **保持极速（微软版 3.5 倍）** |
+| **TCP 回环延迟 (`tcp_loop`)** | 543.06 μs | 539.99 μs | 517.37 μs | **506.94 μs** | **创历史最低延迟** |
+
 
 ## Usage
 

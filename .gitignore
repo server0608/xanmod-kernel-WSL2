@@ -1,2 +1,6 @@
 __pycache__
 linux/
+bzImage*
+*.vhdx
+*.vhdx.7z
+*.img

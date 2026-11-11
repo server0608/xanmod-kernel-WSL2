@@ -8,12 +8,13 @@ usage() {
   echo "Options:"
   echo "  -a|--arch <architecture>  - Specify the architecture to build. (Default: GENERIC_CPU3)"
   echo "  --branch <LTS|MAIN>       - Specify the Xanmod kernel branch to build.  (Default: MAIN)"
+  echo "  -p|--no-mitigations       - Disable CPU mitigations & enable THP always for maximum performance."
   echo "  --no-download             - Don't download kernel source, assume it's already in ./linux"
   echo "  -h|--help                 - Show this help message."
 }
 
 # Parse options with getopt
-temp=$(getopt -o 'b:a:h' --long 'branch:,arch:,help,no-download' -n 'setup.sh' -- "$@")
+temp=$(getopt -o 'b:a:ph' --long 'branch:,arch:,no-mitigations,help,no-download' -n 'setup.sh' -- "$@")
 if [ $? -ne 0 ]; then
   # unsupported options provided
   usage
@@ -36,6 +37,11 @@ while true; do
     '-a'|'--arch')
       ARCH="$2"
       shift 2
+      continue
+      ;;
+    '-p'|'--no-mitigations')
+      NO_MITIGATIONS="YES"
+      shift
       continue
       ;;
     '-h'|'--help')
@@ -63,6 +69,7 @@ done
 ARCH=${ARCH:-GENERIC_CPU3}
 BRANCH=${BRANCH:-MAIN}
 SKIP_DOWNLOAD=${SKIP_DOWNLOAD:-NO}
+NO_MITIGATIONS=${NO_MITIGATIONS:-NO}
 
 if [ "$SKIP_DOWNLOAD" = "NO" ]; then
   LOWERCASE_BRANCH="${BRANCH,,}"
@@ -117,3 +124,15 @@ case "$ARCH" in
     scripts/config -e $ARCH
     ;;
 esac
+
+# Performance tunings (zero mitigations + full speed)
+if [ "$NO_MITIGATIONS" = "YES" ]; then
+  echo "Applying performance optimizations: disabling CPU mitigations and enabling THP shmem/tmpfs always..."
+  scripts/config -d CONFIG_CPU_MITIGATIONS
+  scripts/config --set-str CONFIG_CMDLINE "cgroup_no_v1=all systemd.unified_cgroup_hierarchy=1 thp_anon=16K-2M:inherit mitigations=off"
+  scripts/config -d CONFIG_TRANSPARENT_HUGEPAGE_TMPFS_HUGE_WITHIN_SIZE
+  scripts/config -e CONFIG_TRANSPARENT_HUGEPAGE_TMPFS_HUGE_ALWAYS
+  scripts/config -d CONFIG_TRANSPARENT_HUGEPAGE_SHMEM_HUGE_WITHIN_SIZE
+  scripts/config -e CONFIG_TRANSPARENT_HUGEPAGE_SHMEM_HUGE_ALWAYS
+  make LLVM=1 LLVM_IAS=1 olddefconfig
+fi

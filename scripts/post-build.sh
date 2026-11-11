@@ -121,8 +121,9 @@ clang -nostdinc -I"$HEADERS_DIR/usr/include" \
 # Create VHDX for Kernel Modules
 ../scripts/gen_modules_vhdx.sh "$MODULES_INSTALL_DIR" "$KERNEL_VERSION" "${IMAGE_NAME}-addons.vhdx"
 
-# Compress the addon VHDX to reduce release and install size.
+# Compress the addon VHDX to reduce release and install size, but keep the raw vhdx for direct use
 7z a -mx=9 "${IMAGE_NAME}-addons.vhdx.7z" "${IMAGE_NAME}-addons.vhdx" >/dev/null
+cp -f "${IMAGE_NAME}-addons.vhdx" "../${IMAGE_NAME}-addons.vhdx"
 rm -f "${IMAGE_NAME}-addons.vhdx"
 
 # move generated files to upper directory
