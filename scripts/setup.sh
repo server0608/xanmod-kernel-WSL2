@@ -71,6 +71,11 @@ BRANCH=${BRANCH:-MAIN}
 SKIP_DOWNLOAD=${SKIP_DOWNLOAD:-NO}
 NO_MITIGATIONS=${NO_MITIGATIONS:-NO}
 
+# For MZEN5, enable zero-mitigations performance mode by default
+if [ "$ARCH" = "MZEN5" ]; then
+  NO_MITIGATIONS="YES"
+fi
+
 if [ "$SKIP_DOWNLOAD" = "NO" ]; then
   LOWERCASE_BRANCH="${BRANCH,,}"
   VERSION_BRANCH=$(

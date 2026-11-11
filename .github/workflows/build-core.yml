@@ -43,6 +43,7 @@ jobs:
             image-name: bzImage-zen3
           - arch: MZEN5
             image-name: bzImage-zen5
+            extra-flags: "--no-mitigations"
 
     steps:
       - uses: actions/checkout@main
@@ -60,7 +61,7 @@ jobs:
         shell: bash
         run: |
           git config --global --add safe.directory '*' # workaround for git safe.directory issue
-          ./scripts/setup.sh --arch ${{ matrix.arch }} --branch ${{ inputs.branch }}
+          ./scripts/setup.sh --arch ${{ matrix.arch }} --branch ${{ inputs.branch }} ${{ matrix.extra-flags }}
           cd linux
 
           # Load version info into env
